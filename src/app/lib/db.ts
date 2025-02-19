@@ -1,28 +1,14 @@
 // app/lib/db.ts
 import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL!);
+const DATABASE_URL = process.env.DATABASE_URL;
 
-// 初始化資料庫表
-export async function initDatabase() {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS urls (
-        id SERIAL PRIMARY KEY,
-        original_url TEXT NOT NULL,
-        short_id VARCHAR(10) UNIQUE NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-        clicks INTEGER DEFAULT 0
-      );
-    `;
-    console.log('Database initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize database:', error);
-    throw error;
-  }
+if (!DATABASE_URL) {
+  throw new Error('DATABASE_URL is not defined in environment variables');
 }
 
-// 創建短網址
+const sql = neon(DATABASE_URL);
+
 export async function createShortUrl(originalUrl: string, shortId: string) {
   try {
     const result = await sql`
@@ -32,11 +18,11 @@ export async function createShortUrl(originalUrl: string, shortId: string) {
     `;
     return result[0];
   } catch (error) {
+    console.error('Error creating short URL:', error);
     throw error;
   }
 }
 
-// 獲取原始網址
 export async function getOriginalUrl(shortId: string) {
   try {
     const result = await sql`
@@ -47,6 +33,7 @@ export async function getOriginalUrl(shortId: string) {
     `;
     return result[0]?.original_url;
   } catch (error) {
+    console.error('Error getting original URL:', error);
     throw error;
   }
 }
