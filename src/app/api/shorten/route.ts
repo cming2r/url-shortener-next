@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createShortUrl } from '@/app/lib/db';
 
-export const runtime = 'edge'; // 使用 Edge Runtime 以獲得更好的性能
+export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     // 驗證 URL
     try {
       new URL(url);
-    } catch (e) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid URL' },
         { status: 400 }
@@ -28,19 +28,20 @@ export async function POST(request: NextRequest) {
     }
 
     const shortId = nanoid(8);
-    const result = await createShortUrl(url, shortId);
+    await createShortUrl(url, shortId);
     
     return NextResponse.json({
       success: true,
       shortUrl: `${process.env.NEXT_PUBLIC_APP_URL}/${shortId}`,
       shortId
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating short URL:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
       { 
         success: false,
-        error: error.message || 'Internal server error' 
+        error: errorMessage 
       },
       { status: 500 }
     );
