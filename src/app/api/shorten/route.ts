@@ -1,4 +1,4 @@
-// app/api/shorten/route.ts
+// src/app/api/shorten/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createShortUrl } from '@/app/lib/db';
@@ -46,9 +46,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// GET 方法用於處理選項請求
-export async function GET() {
-  return new NextResponse('Method not allowed', { status: 405 });
 }
